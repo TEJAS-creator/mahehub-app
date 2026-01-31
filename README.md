@@ -1,3 +1,9 @@
+# 📊 DEMO
+
+# <img width="1880" height="954" alt="image" src="https://github.com/user-attachments/assets/896b45ec-5c00-481b-a6ee-9fc563a36271" />
+<img width="1876" height="958" alt="image" src="https://github.com/user-attachments/assets/a561992d-aa8b-4c0b-bd55-0df810378ecb" />
+<img width="1890" height="954" alt="image" src="https://github.com/user-attachments/assets/2429a920-90b1-47c7-93e4-13629399283b" />
+
 # 🎓 MaheHub — Real-Time Event Management System
 
 MaheHub is a real-time, full-stack event management platform designed for college campuses. It allows students to discover and register for events, organizers to submit event requests, and administrators to manage approvals with instant real-time updates using WebSockets.
