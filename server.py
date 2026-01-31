@@ -6,9 +6,10 @@ import time
 from pymongo import MongoClient, DESCENDING
 
 # --- CONFIGURATION ---
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://admin:mahehub2026*@cluster0.mongodb.net/?retryWrites=true&w=majority")
+# Render/Heroku will use the environment variable, or fallback to your Atlas string
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://mahehub:mahehub2026*@cluster0.oaze9sv.mongodb.net/?appName=Cluster0")
 
-# Connect to MongoDB 
+# Connect to MongoDB with a retry timeout
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client['mahehub_db']
 events_col = db['events']
@@ -96,7 +97,7 @@ async def handle_connection(websocket):
                     "id": p['id'], "name": p['name'], "club": p['club'],
                     "description": p['desc'], "status": "pending",
                     "date": p.get('date'), "time": p.get('time'),
-                    "created_at": time.time()  
+                    "created_at": time.time()  # Fixed: Use standard time.time()
                 })
                 await broadcast_sync()
 
@@ -133,6 +134,7 @@ async def handle_connection(websocket):
         if websocket in CLIENTS: del CLIENTS[websocket]
 
 async def main():
+    # Render uses dynamic ports; default to 10000 if not found
     port = int(os.environ.get("PORT", 10000)) 
     async with websockets.serve(handle_connection, "0.0.0.0", port):
         print(f"🚀 MaheHub Backend (Atlas) Online on Port {port}")
