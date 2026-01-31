@@ -4,7 +4,7 @@ MaheHub is a real-time, full-stack event management platform designed for colleg
 
 ## 🚀 Live Demo
 
-Frontend (Netlify): https://mahehub.netlify.app
+Frontend (Netlify): https://mahehub.netlify.app  (currently issues in studentlogin page)
 
 ## ✨ Features
 
