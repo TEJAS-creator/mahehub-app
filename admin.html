@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Campus Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-red: #ff3e4e;
+            --accent-cyan: #00f2ff;
+            --accent-orange: #ff9f0a;
+            --bg-dark: #050505;
+            --panel-dark: #121217;
+            
+            --text-main: #ffffff !important;   
+            --text-body: #e2e2e5 !important;   
+            --text-muted: #8a8a98 !important;  
+            --text-dim: #666670 !important;    
+
+            --sidebar-collapsed: 80px;
+            --sidebar-expanded: 260px;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-body); 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-collapsed);
+            background: var(--panel-dark);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid #2d2d35;
+            z-index: 1000;
+            overflow: hidden;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            white-space: nowrap;
+        }
+
+        .sidebar:hover {
+            width: var(--sidebar-expanded);
+            box-shadow: 15px 0 30px rgba(0,0,0,0.5);
+        }
+
+        .brand {
+            padding: 25px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: var(--accent-cyan);
+            font-weight: 800;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+
+        .icon-box {
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .gradient-box {
+            background: linear-gradient(135deg, #ff3e4e, #a336ff);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 62, 78, 0.4);
+        }
+
+        .brand-text, .menu-text {
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .sidebar:hover .brand-text, 
+        .sidebar:hover .menu-text {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-list { flex-grow: 1; padding: 15px 10px; }
+
+        .menu-item {
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: var(--transition);
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.08);
+            border-right: 3px solid var(--primary-red);
+        }
+
+        /* --- CONTENT AREA --- */
+        .main-content {
+            margin-left: var(--sidebar-collapsed);
+            padding: 60px;
+            width: 100%;
+            transition: var(--transition);
+            box-sizing: border-box;
+        }
+
+        .sidebar:hover + .main-content {
+            margin-left: var(--sidebar-expanded);
+        }
+
+        header {
+            margin-bottom: 50px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        #viewTitle {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            color: var(--text-main);
+            margin: 0;
+            text-shadow: 0 0 20px rgba(255, 62, 78, 0.2); 
+        }
+
+        .sub-header-text {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sub-header-text::before {
+            content: '';
+            width: 30px;
+            height: 2px;
+            background: var(--primary-red);
+        }
+
+        /* --- DASHBOARD STATS --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--panel-dark);
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid #2d2d35;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .stat-card:hover { border-color: var(--primary-red); transform: translateY(-5px); }
+        .stat-val { font-size: 2.5rem; font-weight: 700; font-family: 'Space Grotesk'; color: var(--text-main); }
+        .stat-label { color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+
+        /* --- CARDS & TABLES --- */
+        .card { 
+            background: var(--panel-dark); 
+            border-radius: 20px; 
+            border: 1px solid #2d2d35; 
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            background: rgba(255, 255, 255, 0.03);
+            text-align: left; 
+            color: var(--text-dim); 
+            padding: 20px 25px; 
+            text-transform: uppercase; 
+            font-size: 11px; 
+            letter-spacing: 1.5px;
+        }
+
+        td { padding: 20px 25px; border-bottom: 1px solid #2d2d35; font-size: 0.95rem; vertical-align: middle; }
+        tr:hover td { background: rgba(255, 255, 255, 0.01); }
+
+        .schedule-info {
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .schedule-info span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .btn-approve { background: #10b981; color: white; margin-right: 8px; }
+        .btn-reject { background: #ef4444; color: white; }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        .status-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .hidden { display: none; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="icon-box"><i data-lucide="crown" size="28"></i></div>
+            <span class="brand-text">CAMPUS ADMIN</span>
+        </div>
+        
+        <nav class="menu-list">
+            <div class="menu-item active" onclick="switchTab('dashboard', this)">
+                <div class="icon-box gradient-box" style="background: linear-gradient(135deg, #00f2ff, #a336ff);"><i data-lucide="layout-dashboard"></i></div>
+                <span class="menu-text">Dashboard</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('approve', this)">
+                <div class="icon-box gradient-box"><i data-lucide="check-circle"></i></div>
+                <span class="menu-text">Approved</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('pending', this)">
+                <div class="icon-box gradient-box" style="background: linear-gradient(135deg, #ff9f0a, #ff3e4e);"><i data-lucide="clock"></i></div>
+                <span class="menu-text">Pending</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('reject', this)">
+                <div class="icon-box" style="color: var(--accent-orange);"><i data-lucide="history"></i></div>
+                <span class="menu-text">History</span>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1 id="viewTitle">Admin Dashboard</h1>
+            <div class="sub-header-text" id="subTitle">Overview of campus engagement and metrics</div>
+        </header>
+
+        <div id="dashboardSection">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Total Events</span>
+                    <span class="stat-val" id="totalEventsCount">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Registered Students</span>
+                    <span class="stat-val" id="totalStudentsCount" style="color: var(--accent-cyan);">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Pending Reviews</span>
+                    <span class="stat-val" id="pendingReviewsCount" style="color: var(--accent-orange);">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="tableSection" class="hidden">
+            <div class="card">
+                <table id="eventTable">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Organization</th>
+                            <th>Schedule</th>
+                            <th>Description</th>
+                            <th style="text-align:right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        const socket = new WebSocket('ws://localhost:3000');
+        let allEvents = [];
+        let currentTab = 'dashboard';
+
+        socket.onopen = () => socket.send(JSON.stringify({ type: 'REGISTER', role: 'admin' }));
+
+        socket.onmessage = (msg) => {
+            const data = JSON.parse(msg.data);
+            if (data.type === 'SYNC_DATA') {
+                allEvents = data.payload;
+                renderView();
+            }
+        };
+
+        function switchTab(tab, el) {
+            currentTab = tab;
+            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Update Headers
+            const title = tab === 'dashboard' ? 'Admin Dashboard' : tab.charAt(0).toUpperCase() + tab.slice(1) + " Events";
+            document.getElementById('viewTitle').innerText = title;
+            document.getElementById('subTitle').innerText = tab === 'dashboard' ? 'Overview of campus engagement and metrics' : 'Control center for all campus activity approvals';
+
+            // Toggle Visibility
+            if (tab === 'dashboard') {
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                document.getElementById('tableSection').classList.add('hidden');
+            } else {
+                document.getElementById('dashboardSection').classList.add('hidden');
+                document.getElementById('tableSection').classList.remove('hidden');
+            }
+            
+            renderView();
+        }
+
+        function renderView() {
+            // 1. Update Dashboard Stats
+            document.getElementById('totalEventsCount').innerText = allEvents.length;
+            document.getElementById('pendingReviewsCount').innerText = allEvents.filter(e => e.status === 'pending').length;
+            
+            // Assuming each event object has an 'attendees' array or 'registeredCount' field
+            const studentTotal = allEvents.reduce((acc, ev) => acc + (ev.registeredCount || 0), 0);
+            document.getElementById('totalStudentsCount').innerText = studentTotal;
+
+            // 2. Render Table if applicable
+            if (currentTab !== 'dashboard') {
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = "";
+                const filtered = allEvents.filter(ev => {
+                    if (currentTab === 'reject') return ev.status === 'reject';
+                    return ev.status === currentTab;
+                });
+                
+                filtered.forEach(ev => {
+                    const row = tbody.insertRow();
+                    const safe = JSON.stringify(ev).replace(/"/g, '&quot;');
+                    
+                    let actions = currentTab === 'pending' ? 
+                        `<div style="text-align:right">
+                            <button class="btn btn-approve" onclick="decide('${ev.id}','${ev.name}','approve',${safe})">Approve</button>
+                            <button class="btn btn-reject" onclick="decide('${ev.id}','${ev.name}','reject',${safe})">Reject</button>
+                        </div>` :
+                        `<div style="text-align:right">
+                            <span class="status-pill" style="color:${ev.status==='approve'?'#10b981':'#ef4444'}; background:${ev.status==='approve'?'#10b9811a':'#ef44441a'}">
+                                ${ev.status.toUpperCase()}
+                            </span>
+                        </div>`;
+                    
+                    row.innerHTML = `
+                        <td style="font-weight:600; color:var(--text-main)">${ev.name}</td>
+                        <td><span style="color:var(--primary-red)">#</span> ${ev.club}</td>
+                        <td>
+                            <div class="schedule-info">
+                                <span><i data-lucide="calendar" size="14"></i> ${ev.date || 'No Date'}</span>
+                                <span><i data-lucide="clock" size="14"></i> ${ev.time || 'No Time'}</span>
+                            </div>
+                        </td>
+                        <td style="color:var(--text-muted); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ev.desc}</td>
+                        <td>${actions}</td>
+                    `;
+                });
+                lucide.createIcons();
+            }
+        }
+
+        function decide(id, name, status, payload) {
+            socket.send(JSON.stringify({ type: 'EVENT_DECISION', id, name, status, payload }));
+        }
+    </script>
+</body>
+</html>

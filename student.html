@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Campus Control | Student Portal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --netflix-red: #e50914;
+            --netflix-red-glow: rgba(229, 9, 20, 0.6);
+            --bg-dark: #000000;
+            --sidebar-collapsed: 75px;
+            --sidebar-expanded: 280px;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body { 
+            background: var(--bg-dark); 
+            color: white; 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            display: flex;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* --- BACKGROUND MARQUEE --- */
+        .marquee {
+            position: fixed;
+            top: 20vh;
+            font-family: 'Syncopate', sans-serif;
+            font-size: 15vw;
+            white-space: nowrap;
+            color: rgba(255,255,255,0.03);
+            z-index: -1;
+            user-select: none;
+            text-transform: uppercase;
+            transition: var(--transition);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-collapsed);
+            background: rgba(0, 0, 0, 0.9);
+            height: 100vh;
+            position: fixed;
+            z-index: 1002;
+            border-right: 1px solid var(--glass-border);
+            transition: width var(--transition), background var(--transition), backdrop-filter var(--transition);
+            display: flex;
+            flex-direction: column;
+            padding-top: 20px;
+        }
+
+        .sidebar:hover { 
+            width: var(--sidebar-expanded); 
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(160%);
+        }
+
+        .sidebar:hover ~ .main-content {
+            filter: blur(4px);
+            transform: scale(0.98);
+            opacity: 0.7;
+        }
+
+        .nav-trigger { padding: 20px 25px; margin-bottom: 40px; display: flex; flex-direction: column; gap: 6px; }
+        .nav-trigger div { width: 25px; height: 2px; background: white; transition: 0.3s; }
+        .sidebar:hover .nav-trigger div:nth-child(2) { width: 15px; background: var(--netflix-red); box-shadow: 0 0 10px var(--netflix-red); }
+
+        .menu-item {
+            padding: 18px 25px; color: #666; cursor: pointer; display: flex; align-items: center; gap: 25px; transition: 0.3s; position: relative;
+        }
+        .menu-item:hover, .menu-item.active { color: white; background: linear-gradient(90deg, rgba(229, 9, 20, 0.1) 0%, transparent 100%); }
+        .menu-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--netflix-red); box-shadow: 0 0 15px var(--netflix-red); }
+        .menu-text { opacity: 0; font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 2px; transform: translateX(-10px); transition: 0.3s; }
+        .sidebar:hover .menu-text { opacity: 1; transform: translateX(0); }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { 
+            margin-left: var(--sidebar-collapsed); 
+            padding: 120px 60px; 
+            width: calc(100% - var(--sidebar-collapsed)); 
+            transition: var(--transition); 
+            overflow-y: auto;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* --- HEADER REPOSITIONED --- */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            display: flex; align-items: center; padding: 0 30px;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+            z-index: 1001; border-bottom: 1px solid var(--glass-border);
+            box-sizing: border-box;
+        }
+
+        .logo-text {
+            font-family: 'Syncopate', sans-serif;
+            color: var(--netflix-red);
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            margin-left: 65px;
+            text-shadow: 0 0 15px var(--netflix-red-glow);
+            flex-shrink: 0;
+        }
+
+        /* Repositioned Welcome Message */
+        .user-profile {
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 900;
+            color: #fff;
+            position: absolute;
+            left: 60%; /* Moves it toward middle-right */
+            transform: translateX(180%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-profile span { color: var(--netflix-red); }
+
+        .hero-title { font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; line-height: 0.85; margin-bottom: 50px; text-transform: uppercase; }
+        .hero-title span { color: var(--netflix-red); text-shadow: 0 0 30px var(--netflix-red-glow); }
+
+        /* --- GRID & CARDS --- */
+        .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+        .event-card {
+            background: #0a0a0a; border: 1px solid #1a1a1a; padding: 40px; position: relative; transition: 0.5s;
+        }
+        .event-card:hover { border-color: var(--netflix-red); background: #000; transform: translateY(-5px); }
+        
+        .club-badge { font-family: 'Syncopate', sans-serif; font-size: 0.6rem; background: var(--netflix-red); padding: 4px 10px; margin-bottom: 15px; display: inline-block; letter-spacing: 1px;}
+        .event-card h3 { font-size: 1.8rem; margin: 10px 0; font-weight: 900; text-transform: uppercase; }
+        
+        /* Time & Date Display */
+        .event-meta { font-size: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; font-weight: 700; display: flex; flex-direction: column; gap: 4px; }
+        .event-meta span { color: #aaa; }
+
+        .desc { color: #888; line-height: 1.5; font-size: 0.9rem; margin-bottom: 25px; }
+        
+        .reg-btn { 
+            border: 1px solid white; background: transparent; color: white; padding: 14px; width: 100%; 
+            text-transform: uppercase; font-weight: 900; letter-spacing: 2px; cursor: pointer; 
+            transition: 0.4s; position: relative; z-index: 1; 
+        }
+        .reg-btn:hover { color: black; border-color: var(--netflix-red); }
+        .reg-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 0; height: 100%; background: var(--netflix-red); z-index: -1; transition: 0.4s; }
+        .reg-btn:hover::before { width: 100%; }
+
+        .history-card { background: #0a0a0a; border-left: 4px solid var(--netflix-red); padding: 25px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #222; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--netflix-red); }
+    </style>
+</head>
+<body>
+
+    <div class="marquee" id="bg-text">CAMPUS•CONTROL•LIVE•EVENTS•REGISTER•NOW•</div>
+
+    <header>
+        <div class="logo-text">HUB</div>
+        <div class="user-profile">WELCOME, <span id="display-name">STUDENT</span></div>
+    </header>
+
+    <div class="sidebar">
+        <div class="nav-trigger"><div></div><div></div><div></div></div>
+        <div class="menu-item active" onclick="showTab('live', this)">
+            <span class="icon">🔥</span> <span class="menu-text">Discover</span>
+        </div>
+        <div class="menu-item" onclick="showTab('history', this)">
+            <span class="icon">🎟️</span> <span class="menu-text">My Access</span>
+        </div>
+        <div class="menu-item" onclick="logout()" style="margin-top: auto; border-top: 1px solid #111;">
+            <span class="icon">🚪</span> <span class="menu-text">Logout</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="tab-live">
+            <h1 class="hero-title">LIVE<br><span>EXPERIENCES</span></h1>
+            <div class="event-grid" id="grid"></div>
+        </div>
+        <div id="tab-history" style="display: none;">
+            <h1 class="hero-title">MY<br><span>TICKETS</span></h1>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- AUTHENTICATION CHECK ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+            document.getElementById('display-name').innerText = user.username || "STUDENT";
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = "login.html";
+        }
+
+        // --- CORE LOGIC ---
+        const socket = new WebSocket('ws://localhost:3000');
+        const grid = document.getElementById('grid');
+        
+        const userSession = JSON.parse(localStorage.getItem('currentUser')) || { email: 'guest' };
+        const regKey = `events_${userSession.email}`;
+        let myRegistrations = JSON.parse(localStorage.getItem(regKey)) || [];
+
+        anime({
+            targets: '#bg-text',
+            translateX: ['0%', '-50%'],
+            duration: 30000,
+            easing: 'linear',
+            loop: true
+        });
+
+        socket.onopen = () => socket.send(JSON.stringify({ type: 'REGISTER', role: 'student' }));
+
+        window.showTab = (tab, el) => {
+            document.getElementById('tab-live').style.display = tab === 'live' ? 'block' : 'none';
+            document.getElementById('tab-history').style.display = tab === 'history' ? 'block' : 'none';
+            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            if(tab === 'history') renderHistory();
+        };
+
+        function createCard(payload) {
+            const card = document.createElement('div');
+            card.className = 'event-card';
+            card.innerHTML = `
+                <div class="club-badge">${payload.club}</div>
+                <h3>${payload.name}</h3>
+                <div class="event-meta">
+                    <div>DATE: <span>${payload.date || 'TBA'}</span></div>
+                    <div>TIME: <span>${payload.time || 'TBA'}</span></div>
+                </div>
+                <p class="desc">${payload.desc}</p>
+                <button class="reg-btn" onclick="registerForEvent('${payload.id}', '${payload.name}')">Secure Access</button>
+            `;
+            return card;
+        }
+
+        window.registerForEvent = (id, name) => {
+            if(myRegistrations.includes(name)) return alert("Access already secured.");
+            myRegistrations.push(name);
+            localStorage.setItem(regKey, JSON.stringify(myRegistrations));
+            
+            // Registration Success Flash
+            anime({
+                targets: 'body',
+                backgroundColor: ['#e50914', '#000'],
+                duration: 800,
+                easing: 'easeOutQuad'
+            });
+            alert(`Ticket secured for ${name}!`);
+        };
+
+        function renderHistory() {
+            const hList = document.getElementById('historyList');
+            hList.innerHTML = myRegistrations.length ? "" : "<p style='color:#222; font-weight:900; font-size:2rem;'>NO ACTIVE TICKETS.</p>";
+            myRegistrations.forEach(name => {
+                hList.innerHTML += `<div class="history-card"><span>${name}</span><span style="color:var(--netflix-red); font-size:0.7rem; letter-spacing:2px;">VERIFIED ACCESS</span></div>`;
+            });
+        }
+
+        socket.onmessage = (msg) => {
+            const data = JSON.parse(msg.data);
+            if (data.type === 'SYNC_DATA' || data.type === 'POST_LIVE_EVENT') {
+                if(data.type === 'SYNC_DATA') {
+                    grid.innerHTML = "";
+                    data.payload.filter(ev => ev.status === 'approve').forEach(ev => grid.appendChild(createCard(ev)));
+                } else { grid.prepend(createCard(data.payload)); }
+                
+                anime({
+                    targets: '.event-card',
+                    scale: [0.95, 1],
+                    opacity: [0, 1],
+                    translateY: [30, 0],
+                    delay: anime.stagger(100),
+                    easing: 'easeOutQuart'
+                });
+
+                VanillaTilt.init(document.querySelectorAll(".event-card"), {
+                    max: 12, speed: 800, glare: true, "max-glare": 0.1
+                });
+            }
+        };
+    </script>
+</body>
+</html>
